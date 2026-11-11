@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Tablero Kanban - Cocina{% endblock %}
+{% block extra_css %}
+<style>
+.kanban-col { min-height: 400px; }
+.kanban-card { cursor: pointer; transition: transform 0.2s; }
+.kanban-card:hover { transform: translateY(-2px); }
+.kanban-header { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+.priority-urgente { border-left: 4px solid #dc3545 !important; }
+.priority-alta { border-left: 4px solid #fd7e14 !important; }
+.priority-normal { border-left: 4px solid #0d6efd !important; }
+.priority-baja { border-left: 4px solid #6c757d !important; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="bi bi-kanban me-2 text-danger"></i>Tablero de Cocina</h2>
+        <span class="text-muted small">Total: {{ total_tareas }} tareas activas</span>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+        {% if pedidos_sin_tarea > 0 %}
+        <span class="badge bg-warning text-dark"><i class="bi bi-clock me-1"></i>{{ pedidos_sin_tarea }} pedido(s) sin ingresar</span>
+        {% endif %}
+        <a href="{% url 'cocina:nueva_tarea' %}" class="btn btn-danger"><i class="bi bi-plus-circle me-1"></i>Ingresar Pedido a Cocina</a>
+    </div>
+</div>
+<div class="row g-3" id="kanban-board">
+    {% for columna in columnas %}
+    <div class="col" style="min-width: 220px;">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header text-white text-center kanban-header" style="background-color: {{ columna.color }}">
+                <i class="{{ columna.icono }} me-1"></i>{{ columna.nombre }}
+                <span class="badge bg-white text-dark ms-2">{{ columna.tareas|length }}</span>
+            </div>
+            <div class="card-body kanban-col bg-light p-2">
+                {% for tarea in columna.tareas %}
+                <div class="card kanban-card mb-2 shadow-sm border-0 priority-{{ tarea.prioridad }}" data-id="{{ tarea.pk }}">
+                    <div class="card-body p-2">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-bold text-danger">{{ tarea.pedido.numero }}</small>
+                            <span class="badge bg-{% if tarea.prioridad == 'urgente' %}danger{% elif tarea.prioridad == 'alta' %}warning text-dark{% else %}secondary{% endif %} small">{{ tarea.get_prioridad_display }}</span>
+                        </div>
+                        <div class="fw-semibold small">{{ tarea.pedido.producto.nombre }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-person me-1"></i>Cliente: {{ tarea.pedido.cliente.nombre }}</div>
+                        <div class="text-muted" style="font-size: 0.75rem;"><i class="bi bi-calendar me-1"></i>Entrega: {{ tarea.pedido.fecha_entrega|date:"d/m H:i" }}</div>
+                        <div class="mt-1" style="font-size: 0.75rem;">
+                            <span class="badge bg-light text-dark border">
+                                <i class="bi bi-person-badge text-danger me-1"></i>
+                                {% if tarea.responsable %}
+                                    {{ tarea.responsable.get_full_name|default:tarea.responsable.username }}
+                                {% else %}
+                                    <em class="text-muted">Sin asignar</em>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mt-2 d-flex gap-1">
+                            {% if tarea.estado != 'listo' %}
+                            <form method="post" action="{% url 'cocina:avanzar' tarea.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success py-0" title="Avanzar"><i class="bi bi-arrow-right"></i></button>
+                            </form>
+                            {% endif %}
+                            <a href="{% url 'cocina:detalle_tarea' tarea.pk %}" class="btn btn-sm btn-outline-secondary py-0"><i class="bi bi-eye"></i></a>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-3" style="font-size: 0.8rem;"><i class="bi bi-inbox"></i><br>Vacío</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

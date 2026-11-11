@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Ingresar Pedido a Cocina{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2 class="fw-bold"><i class="bi bi-plus-circle me-2 text-danger"></i>Ingresar Pedido a Taller de Cocina</h2>
+    <a href="{% url 'cocina:kanban' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver al Tablero</a>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Seleccionar Pedido Pendiente *</label>
+                    {% render_field form.pedido class="form-select" %}
+                    {% if form.pedido.errors %}<div class="text-danger small">{{ form.pedido.errors }}</div>{% endif %}
+                    <small class="text-muted">Solo se listan pedidos que aún no han sido ingresados al taller de cocina.</small>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Repostero / Cocinero Responsable</label>
+                    {% render_field form.responsable class="form-select" %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Prioridad</label>
+                    {% render_field form.prioridad class="form-select" %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Instrucciones o Notas de Cocina</label>
+                    {% render_field form.notas_cocina class="form-control" rows="3" placeholder="Detalles de preparación, precauciones con ingredientes, etc." %}
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-danger"><i class="bi bi-check-circle me-2"></i>Ingresar al Tablero</button>
+                <a href="{% url 'cocina:kanban' %}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

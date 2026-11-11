@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Mi Perfil{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-person-circle me-2"></i>Mi Perfil</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Usuario:</strong> {{ usuario.username }}</p>
+                <p><strong>Nombre:</strong> {{ usuario.get_full_name|default:"No especificado" }}</p>
+                <p><strong>Email:</strong> {{ usuario.email|default:"Sin email registrado" }}</p>
+                {% if usuario.perfil %}
+                <p><strong>Rol en el Sistema:</strong> <span class="badge bg-danger">{{ usuario.perfil.get_rol_display }}</span></p>
+                <p><strong>Teléfono:</strong> {{ usuario.perfil.telefono|default:"No registrado" }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

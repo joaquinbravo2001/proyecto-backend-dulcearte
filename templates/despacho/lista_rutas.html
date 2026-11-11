@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Rutas de Despacho{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-truck me-2 text-danger"></i>Rutas de Despacho</h2>
+    <a href="{% url 'despacho:nueva_ruta' %}" class="btn btn-danger"><i class="bi bi-plus-circle me-2"></i>Nueva Ruta</a>
+</div>
+<div class="row g-4">
+    {% for ruta in rutas %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 fw-bold">{{ ruta.nombre }}</h6>
+                {% if ruta.estado == 'completada' %}<span class="badge bg-success">{{ ruta.get_estado_display }}</span>
+                {% elif ruta.estado == 'en_ruta' %}<span class="badge bg-primary">{{ ruta.get_estado_display }}</span>
+                {% else %}<span class="badge bg-warning text-dark">{{ ruta.get_estado_display }}</span>{% endif %}
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><i class="bi bi-calendar me-2 text-muted"></i>{{ ruta.fecha_despacho|date:"d/m/Y" }}</p>
+                <p class="mb-1"><i class="bi bi-person me-2 text-muted"></i>{% if ruta.repartidor %}{{ ruta.repartidor.get_full_name|default:ruta.repartidor.username }}{% else %}Sin asignar{% endif %}</p>
+                <p class="mb-0"><i class="bi bi-box-seam me-2 text-muted"></i>{{ ruta.entregas.count }} entrega(s)</p>
+            </div>
+            <div class="card-footer bg-white border-0">
+                <a href="{% url 'despacho:detalle_ruta' ruta.pk %}" class="btn btn-sm btn-outline-danger w-100"><i class="bi bi-eye me-1"></i>Ver Ruta</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="text-center text-muted py-5"><i class="bi bi-truck display-1 d-block mb-3"></i>No hay rutas de despacho</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

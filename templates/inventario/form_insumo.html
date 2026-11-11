@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2 class="fw-bold"><i class="bi bi-box me-2 text-danger"></i>{{ titulo }}</h2>
+    <a href="{% url 'inventario:lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-8"><label class="form-label fw-semibold">Nombre *</label>{% render_field form.nombre class="form-control" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Categoría *</label>{% render_field form.categoria class="form-select" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Unidad de Medida *</label>{% render_field form.unidad_medida class="form-select" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Stock Actual</label>{% render_field form.stock_actual class="form-control" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Stock Mínimo</label>{% render_field form.stock_minimo class="form-control" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Costo Unitario</label>{% render_field form.costo_unitario class="form-control" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Proveedor</label>{% render_field form.proveedor class="form-control" %}</div>
+                <div class="col-md-4 d-flex align-items-end"><div class="form-check">{% render_field form.activo class="form-check-input" %}<label class="form-check-label">Activo</label></div></div>
+            </div>
+            <div class="mt-4"><button type="submit" class="btn btn-danger"><i class="bi bi-check-circle me-2"></i>Guardar</button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Ruta {{ ruta.nombre }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-truck me-2 text-danger"></i>{{ ruta.nombre }}</h2>
+    <a href="{% url 'despacho:lista_rutas' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+</div>
+
+{% if pedidos_disponibles %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 py-3">
+        <h5 class="mb-0 fw-bold"><i class="bi bi-plus-circle me-2 text-danger"></i>Asignar Pedido Listo a esta Ruta</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" action="{% url 'despacho:agregar_entrega' ruta.pk %}" class="row g-3">
+            {% csrf_token %}
+            <div class="col-md-5">
+                <select name="pedido_id" class="form-select" required>
+                    <option value="">Seleccionar Pedido Listo...</option>
+                    {% for p in pedidos_disponibles %}
+                    <option value="{{ p.pk }}">{{ p.numero }} - {{ p.cliente.nombre }} ({{ p.producto.nombre }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="direccion_entrega" class="form-control" placeholder="Dirección específica (opcional, usa la del cliente por defecto)">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-danger w-100"><i class="bi bi-plus-lg me-1"></i>Asignar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    {% for entrega in ruta.entregas.all %}
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 d-flex justify-content-between py-3">
+                <span class="fw-bold">#{{ entrega.orden_entrega }} - {{ entrega.pedido.numero }}</span>
+                {% if entrega.estado == 'entregado' %}<span class="badge bg-success">Entregado</span>
+                {% elif entrega.estado == 'en_camino' %}<span class="badge bg-primary">En Camino</span>
+                {% else %}<span class="badge bg-warning text-dark">Pendiente</span>{% endif %}
+            </div>
+            <div class="card-body">
+                <p><strong>Cliente:</strong> {{ entrega.pedido.cliente.nombre }} (Tel: {{ entrega.pedido.cliente.telefono }})</p>
+                <p><strong>Dirección:</strong> {{ entrega.direccion_entrega }}</p>
+                <p><strong>Producto:</strong> {{ entrega.pedido.producto.nombre }} (x{{ entrega.pedido.cantidad }})</p>
+                {% if entrega.estado == 'entregado' %}
+                <div class="alert alert-success py-2 mb-2"><i class="bi bi-check-circle me-2"></i>Entregado a {{ entrega.receptor_nombre }} el {{ entrega.hora_entrega_real|date:"d/m/Y H:i" }}</div>
+                {% if entrega.firma_digital %}<p class="mb-1"><strong>Firma:</strong> <br><img src="{{ entrega.firma_digital.url }}" class="img-thumbnail" style="max-height: 80px;"></p>{% endif %}
+                {% if entrega.comprobante_foto %}<p><strong>Comprobante:</strong> <br><img src="{{ entrega.comprobante_foto.url }}" class="img-thumbnail" style="max-height: 80px;"></p>{% endif %}
+                {% else %}
+                <hr>
+                <h6 class="fw-bold text-muted mb-2"><i class="bi bi-pen me-1"></i>Confirmar Despacho / Entrega</h6>
+                <form method="post" action="{% url 'despacho:confirmar_entrega' entrega.pk %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-2"><label class="form-label small fw-semibold">Nombre del Receptor *</label>
+                    <input type="text" name="receptor_nombre" class="form-control form-control-sm" required placeholder="Persona que recibe el pedido"></div>
+                    <div class="mb-2"><label class="form-label small fw-semibold">Firma Digital (imagen)</label>
+                    <input type="file" name="firma_digital" class="form-control form-control-sm" accept="image/*"></div>
+                    <div class="mb-2"><label class="form-label small fw-semibold">Foto Comprobante</label>
+                    <input type="file" name="comprobante_foto" class="form-control form-control-sm" accept="image/*"></div>
+                    <button type="submit" class="btn btn-sm btn-success w-100"><i class="bi bi-check-circle me-2"></i>Confirmar Entrega</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted py-4">No hay entregas registradas en esta ruta</div>
+    {% endfor %}
+</div>
+{% endblock %}

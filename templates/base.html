@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dulce Arte{% endblock %} - Pastelería Artesanal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/dulce_arte.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #c0392b, #922b21);">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-cake2-fill me-2"></i>Dulce Arte
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMain">
+            {% if user.is_authenticated %}
+            {% with user_rol=user.perfil.rol is_admin=user.is_superuser %}
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'pedidos:dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+                </li>
+                {% if is_admin or user_rol == 'admin' or user_rol == 'vendedor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'pedidos:lista' %}"><i class="bi bi-clipboard-check me-1"></i>Pedidos</a>
+                </li>
+                {% endif %}
+                {% if is_admin or user_rol == 'admin' or user_rol == 'cocinero' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cocina:kanban' %}"><i class="bi bi-kanban me-1"></i>Cocina</a>
+                </li>
+                {% endif %}
+                {% if is_admin or user_rol == 'admin' or user_rol == 'bodeguero' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'inventario:lista' %}"><i class="bi bi-boxes me-1"></i>Inventario</a>
+                </li>
+                {% endif %}
+                {% if is_admin or user_rol == 'admin' or user_rol == 'repartidor' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'despacho:lista_rutas' %}"><i class="bi bi-truck me-1"></i>Despacho</a>
+                </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>{{ user.username }}
+                        <span class="badge bg-light text-danger ms-1">{{ user.perfil.get_rol_display|default:'Admin' }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% if user.is_staff or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/admin/"><i class="bi bi-gear me-2"></i>Django Admin</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{% url 'cuentas:perfil' %}"><i class="bi bi-person me-2"></i>Mi Perfil</a></li>
+                        <li><a class="dropdown-item" href="{% url 'cuentas:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+            </ul>
+            {% endwith %}
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid py-4">
+    {% if messages %}
+    <div class="row mb-3">
+        <div class="col">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</div>
+
+<footer class="text-center py-3 mt-auto" style="background: linear-gradient(135deg, #c0392b, #922b21); color: white;">
+    <small><i class="bi bi-cake2-fill me-1"></i>Dulce Arte Pastelería Artesanal &copy; 2026</small>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

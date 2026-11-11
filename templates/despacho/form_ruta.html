@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Nueva Ruta de Despacho{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2 class="fw-bold"><i class="bi bi-truck me-2 text-danger"></i>Nueva Ruta de Despacho</h2>
+    <a href="{% url 'despacho:lista_rutas' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-8"><label class="form-label fw-semibold">Nombre de la Ruta *</label>{% render_field form.nombre class="form-control" placeholder="Ej: Ruta Sector Oriente - Mañana" %}</div>
+                <div class="col-md-4"><label class="form-label fw-semibold">Fecha de Despacho *</label>{% render_field form.fecha_despacho class="form-control" type="date" %}</div>
+                <div class="col-md-6"><label class="form-label fw-semibold">Repartidor Asignado</label>{% render_field form.repartidor class="form-select" %}</div>
+                <div class="col-12"><label class="form-label fw-semibold">Notas de la Ruta</label>{% render_field form.notas class="form-control" rows="2" placeholder="Instrucciones para el repartidor" %}</div>
+            </div>
+            <div class="mt-4"><button type="submit" class="btn btn-danger"><i class="bi bi-check-circle me-2"></i>Crear Ruta</button></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

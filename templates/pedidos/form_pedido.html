@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row mb-3">
+    <div class="col">
+        <h2 class="fw-bold"><i class="bi bi-clipboard-plus me-2 text-danger"></i>{{ titulo }}</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'pedidos:lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+    </div>
+</div>
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Cliente *</label>
+                    {% render_field form.cliente class="form-select" %}
+                    {% if form.cliente.errors %}<div class="text-danger small">{{ form.cliente.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Producto Base *</label>
+                    {% render_field form.producto class="form-select" %}
+                    {% if form.producto.errors %}<div class="text-danger small">{{ form.producto.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Cantidad *</label>
+                    {% render_field form.cantidad class="form-control" %}
+                    {% if form.cantidad.errors %}<div class="text-danger small">{{ form.cantidad.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Precio Total *</label>
+                    {% render_field form.precio_total class="form-control" %}
+                    {% if form.precio_total.errors %}<div class="text-danger small">{{ form.precio_total.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Anticipo</label>
+                    {% render_field form.anticipo class="form-control" %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Fecha y Hora de Entrega *</label>
+                    {% render_field form.fecha_entrega class="form-control" type="datetime-local" %}
+                    {% if form.fecha_entrega.errors %}<div class="text-danger small">{{ form.fecha_entrega.errors }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Estado</label>
+                    {% render_field form.estado class="form-select" %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Descripción Personalizada / Diseño *</label>
+                    {% render_field form.descripcion_personalizada class="form-control" rows="4" placeholder="Describe el diseño, sabor, decoración, texto especial, colores, etc." %}
+                    {% if form.descripcion_personalizada.errors %}<div class="text-danger small">{{ form.descripcion_personalizada.errors }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notas Adicionales</label>
+                    {% render_field form.notas_adicionales class="form-control" rows="2" %}
+                </div>
+            </div>
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-danger"><i class="bi bi-check-circle me-2"></i>{{ boton_submit|default:'Guardar' }}</button>
+                <a href="{% url 'pedidos:lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

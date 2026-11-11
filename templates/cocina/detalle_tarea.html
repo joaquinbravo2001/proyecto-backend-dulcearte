@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}Tarea Cocina - {{ tarea.pedido.numero }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2 class="fw-bold"><i class="bi bi-clipboard2-check me-2 text-danger"></i>Tarea: {{ tarea.pedido.numero }}</h2>
+    <a href="{% url 'cocina:kanban' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver al Kanban</a>
+</div>
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-danger text-white py-3"><h5 class="mb-0">Detalles del Pedido</h5></div>
+            <div class="card-body">
+                <p><strong>Producto:</strong> {{ tarea.pedido.producto.nombre }}</p>
+                <p><strong>Cliente:</strong> {{ tarea.pedido.cliente.nombre }}</p>
+                <p><strong>Cantidad:</strong> {{ tarea.pedido.cantidad }} unidades</p>
+                <p><strong>Entrega programada:</strong> {{ tarea.pedido.fecha_entrega|date:"d/m/Y H:i" }}</p>
+                <p><strong>Repostero / Cocinero Actual:</strong> 
+                    <span class="badge bg-light text-dark border fs-6">
+                        <i class="bi bi-person-badge text-danger me-1"></i>
+                        {% if tarea.responsable %}
+                            {{ tarea.responsable.get_full_name|default:tarea.responsable.username }} (@{{ tarea.responsable.username }})
+                        {% else %}
+                            Sin asignar
+                        {% endif %}
+                    </span>
+                </p>
+                <p><strong>Personalización solicitada:</strong><br><div class="bg-light rounded p-2">{{ tarea.pedido.descripcion_personalizada }}</div></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-0 py-3"><h5 class="mb-0">Estado en Cocina</h5></div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-3">
+                    <span class="badge bg-danger fs-5 px-4 py-2">{{ tarea.get_estado_display }}</span>
+                </div>
+                <form method="post" action="{% url 'cocina:actualizar_tarea' tarea.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3"><label class="form-label fw-semibold">Responsable</label>{% render_field form.responsable class="form-select" %}</div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Prioridad</label>{% render_field form.prioridad class="form-select" %}</div>
+                    <div class="mb-3"><label class="form-label fw-semibold">Notas de Cocina</label>{% render_field form.notas_cocina class="form-control" rows="3" %}</div>
+                    <button type="submit" class="btn btn-danger w-100"><i class="bi bi-check-circle me-2"></i>Actualizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white border-0 py-3"><h5 class="mb-0"><i class="bi bi-clock-history me-2 text-danger"></i>Historial de Cambios</h5></div>
+    <div class="list-group list-group-flush">
+        {% for h in tarea.historial.all %}
+        <div class="list-group-item d-flex justify-content-between">
+            <span>{{ h.estado_anterior }} <i class="bi bi-arrow-right mx-2 text-muted"></i> {{ h.estado_nuevo }}</span>
+            <small class="text-muted">{{ h.fecha|date:"d/m/Y H:i" }} - {{ h.usuario|default:"Sistema" }}</small>
+        </div>
+        {% empty %}
+        <div class="list-group-item text-center text-muted py-3">Sin historial</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

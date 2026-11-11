@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load pedidos_extras %}
+{% block title %}Pedido {{ pedido.numero }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold"><i class="bi bi-clipboard-check me-2 text-danger"></i>{{ pedido.numero }}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'pedidos:editar' pedido.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i>Editar</a>
+        {% if not pedido.insumos_descontados and pedido.estado == 'confirmado' %}
+        <form method="post" action="{% url 'pedidos:descontar_inventario' pedido.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning" onclick="return confirm('¿Descontar insumos del inventario según BOM?')">
+                <i class="bi bi-box-arrow-down me-1"></i>Descontar Inventario (BOM)
+            </button>
+        </form>
+        {% endif %}
+        <a href="{% url 'pedidos:lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Volver</a>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6"><strong>Cliente:</strong> {{ pedido.cliente.nombre }}</div>
+                    <div class="col-md-6"><strong>Teléfono:</strong> {{ pedido.cliente.telefono }}</div>
+                    <div class="col-md-6"><strong>Producto:</strong> {{ pedido.producto.nombre }}</div>
+                    <div class="col-md-6"><strong>Cantidad:</strong> {{ pedido.cantidad }}</div>
+                    <div class="col-md-6"><strong>Fecha Entrega:</strong> {{ pedido.fecha_entrega|date:"d/m/Y H:i" }}</div>
+                    <div class="col-md-6"><strong>Estado:</strong> <span class="badge bg-danger">{{ pedido.get_estado_display }}</span></div>
+                    <div class="col-12"><strong>Personalización:</strong><br><div class="bg-light rounded p-2 mt-1">{{ pedido.descripcion_personalizada }}</div></div>
+                </div>
+            </div>
+        </div>
+        {% if pedido.producto.bom_items.all %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                <h5 class="mb-0"><i class="bi bi-list-check me-2 text-danger"></i>Lista de Materiales (BOM)</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light"><tr><th>Insumo</th><th>Por unidad</th><th>Total (x{{ pedido.cantidad }})</th><th>Unidad</th></tr></thead>
+                    <tbody>
+                        {% for item in pedido.producto.bom_items.all %}
+                        <tr>
+                            <td>{{ item.insumo.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>{{ item.cantidad|multiply:pedido.cantidad }}</td>
+                            <td>{{ item.insumo.unidad_medida }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if pedido.insumos_descontados %}<div class="card-footer bg-success-subtle text-success"><i class="bi bi-check-circle me-2"></i>Insumos ya descontados del inventario</div>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-header bg-white border-0 py-3"><h5 class="mb-0"><i class="bi bi-cash-coin me-2 text-danger"></i>Resumen Financiero</h5></div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2"><span>Precio Total:</span><strong>${{ pedido.precio_total|floatformat:0 }}</strong></div>
+                <div class="d-flex justify-content-between mb-2"><span>Anticipo:</span><span>${{ pedido.anticipo|floatformat:0 }}</span></div>
+                <hr>
+                <div class="d-flex justify-content-between"><span class="fw-bold">Saldo:</span><strong class="text-danger">${{ pedido.saldo_pendiente|floatformat:0 }}</strong></div>
+            </div>
+        </div>
+        {% if pedido.tarea_cocina %}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3"><h5 class="mb-0"><i class="bi bi-kanban me-2 text-danger"></i>Estado en Cocina</h5></div>
+            <div class="card-body text-center">
+                <span class="badge bg-danger fs-6 mb-2">{{ pedido.tarea_cocina.get_estado_display }}</span>
+                <p class="text-muted small mb-0">Responsable: {{ pedido.tarea_cocina.responsable|default:"Sin asignar" }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
